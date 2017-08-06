@@ -398,10 +398,11 @@ class TriviaCommands:
             numls += str(usr.answered_correctly) + '\n'
         embed = discord.Embed(title = "Scoreboard", color = discord.Color.blue())
         if not userls:
-            userls = "None"
+            userls = " "
         if not numls:
-            numls = "None"
+            numls = " "
         embed.add_field(name = 'Users:', value = userls)
+        embed.add_field(name = " ", value = " ")
         embed.add_field(name = 'Scores:', value = numls)
 
         return embed
