@@ -65,25 +65,47 @@ class Server:
         self.already_answered = []
         self.totalquestions = 0
 
+<<<<<<< HEAD
         os.makedirs(os.path.join("servers", self.id, 'pickled'), exist_ok = True)
 
     def init_server(self):
         questionls = []
         for i in os.listdir(os.path.join("./servers", self.id, 'pickled')):
             with open(os.path.join("./servers", self.id, 'pickled', i), 'rb') as picklefile:
+=======
+        os.makedirs(os.path.join("./botstuff/servers", self.id, 'pickled'), exist_ok = True)
+
+    def init_server(self):
+        questionls = []
+        for i in os.listdir(os.path.join("./botstuff/servers", self.id, 'pickled')):
+            with open(os.path.join("./botstuff/servers", self.id, 'pickled', i), 'rb') as picklefile:
+>>>>>>> initial commit
                 question = pickle.load(picklefile)
             questionls.append(question)
         else:
             try:
+<<<<<<< HEAD
                 shutil.copytree("./question_src", os.path.join("./servers", self.id, 'question_src'))
             except FileExistsError:
                 shutil.rmtree(os.path.join("./servers", self.id, 'question_src'))
                 shutil.copytree("./question_src", os.path.join("./servers", self.id, 'question_src'))
             questionls = load_json(os.path.join("./servers", self.id))
+=======
+                shutil.copytree("./botstuff/question_src", os.path.join("./botstuff/servers", self.id, 'question_src'))
+            except FileExistsError:
+                shutil.rmtree(os.path.join("./botstuff/servers", self.id, 'question_src'))
+                shutil.copytree("./botstuff/question_src", os.path.join("./botstuff/servers", self.id, 'question_src'))
+            questionls = load_json(os.path.join("./botstuff/servers", self.id))
+>>>>>>> initial commit
         self.wasinit = True
         self.questionlist = questionls
         self.totalquestions = len(questionls)
 
     def resetquestions(self):
+<<<<<<< HEAD
         shutil.rmtree(os.path.join("./servers", self.id, 'pickled'))
         os.makedirs(os.path.join("./servers", self.id, 'pickled'), exist_ok = True)
+=======
+        shutil.rmtree(os.path.join("./botstuff/servers", self.id, 'pickled'))
+        os.makedirs(os.path.join("./botstuff/servers", self.id, 'pickled'), exist_ok = True)
+>>>>>>> initial commit

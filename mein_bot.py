@@ -3,7 +3,8 @@ from sys import argv
 from discord.ext import commands
 import discord
 import os
-from botstuff.dataclasses import Question
+
+__version__ = '1.0'
 
 description = \
     """TriviaBot"""
@@ -29,6 +30,8 @@ async def on_ready():
             print("Loading extension: {0}".format(i))
             bot.load_extension("cogs.{0}".format(i))
             print("Extension {0} loaded.".format(i))
+
+    print("-" * 12)
 
 
 if __name__ == '__main__':
