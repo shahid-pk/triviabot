@@ -1,0 +1,11 @@
+{
+  "question": "What is the answer to life, the universe, and everything?",
+  "options": {
+    "op1": "Watermelon",
+    "op2": "Coding",
+    "op3": "The number 42",
+    "op4": "Shitposting on Discord"
+  },
+  "answer": "The number 42",
+  "answerno": "3"
+}
