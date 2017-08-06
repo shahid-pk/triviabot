@@ -390,20 +390,24 @@ class TriviaCommands:
     def getscoreboard(server, ctx):
         userls = ""
         numls = ""
+        sepls = ''
         sortls = sorted(server.userdict.values(), key = lambda user: user.answered_correctly, reverse = True)
         for usr in sortls:
             member = discord.utils.get(ctx.message.server.members, mention = usr.mention)
             name = member.display_name
             userls += name + '\n'
             numls += str(usr.answered_correctly) + '\n'
+            sepls += ':\n'
         embed = discord.Embed(title = "Scoreboard", color = discord.Color.blue())
         if not userls:
-            userls = " "
+            userls = '-'
         if not numls:
-            numls = " "
-        embed.add_field(name = 'Users:', value = userls)
-        embed.add_field(name = " ", value = " ")
-        embed.add_field(name = 'Scores:', value = numls)
+            numls = '-'
+        if not sepls:
+            sepls = ':'
+        embed.add_field(name = 'Users', value = userls)
+        embed.add_field(name = ':', value = sepls)
+        embed.add_field(name = 'Scores', value = numls)
 
         return embed
 
