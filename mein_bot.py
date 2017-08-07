@@ -4,7 +4,7 @@ from discord.ext import commands
 import discord
 import os
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 description = \
     """TriviaBot"""

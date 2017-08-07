@@ -4,9 +4,7 @@ from discord.ext import commands
 import json
 import os
 import asyncio
-import pickle
 import shutil
-
 
 qmsg = """Options:
     1) {0}
@@ -15,46 +13,12 @@ qmsg = """Options:
     4) {3}"""
 
 
-def load_json(path):
-    quels = []
-    qno = 0
-    for json_q in os.listdir(os.path.join(path, "question_src")):
-        qno += 1
-        with open(os.path.join(path, "question_src", json_q), 'r', encoding = "UTF-8") as f:
-            rawjson = f.read()
-        que = json.loads(rawjson)
-        questiontext = que['question']
-        optiondict = que['options']
-        o1 = optiondict['op1']
-        o2 = optiondict['op2']
-        o3 = optiondict['op3']
-        o4 = optiondict['op4']
-        answertext = que['answer']
-        answerno = que['answerno']
-        question = Question(questiontext, answertext, answerno, o1, o2, o3, o4, qno)
-        with open(os.path.join(path, 'pickled', str(question.qno) + '.q'), 'wb') as picklefile:
-            pickle.dump(question, picklefile)
-        quels.append(question)
-
-    return quels
-
-
-class Question:
-    def __init__(self, question, answer, answerno, op1, op2, op3, op4, qno):
-        self.question = question
-        self.answer = answer
-        self.answerno = int(answerno)
-        self.options = [op1, op2, op3, op4]
-        self.qno = qno
-
-
 class User:
-    def __init__(self, member, server):
+    def __init__(self, usrid, server):
         self.answered_correctly = 0
         self.answered_incorrectly = 0
-        self.id = member.id
-        self.member = member
-        self.mention = member.mention
+        self.id = usrid
+        self.mention = '<@{}>'.format(usrid)
         self.usersfile = os.path.join('./botstuff/servers/', server, 'Users.json')
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
@@ -67,9 +31,8 @@ class User:
             except json.decoder.JSONDecodeError:
                 dictionary = {}
         dictionary[self.id] = [self.answered_correctly, self.answered_incorrectly, self.mention]
-        jsontxt = json.dumps(dictionary, indent=4)
         with open(self.usersfile, 'w', encoding = "UTF-8") as f:
-            f.write(jsontxt)
+            f.write(json.dumps(dictionary, indent = 4))
 
     def read(self):
         with open(self.usersfile, 'r', encoding = 'UTF-8') as f:
@@ -84,10 +47,17 @@ class User:
         except KeyError:
             pass
 
+    def add_correct(self):
+        self.answered_correctly += 1
+        self.write()
+
+    def add_incorrect(self):
+        self.answered_incorrectly += 1
+        self.write()
+
 
 class Server:
-    def __init__(self, servid, bot):
-        self.wasinit = False
+    def __init__(self, servid):
         self.id = servid
         self.questionlist = []
         self.q = None
@@ -95,53 +65,61 @@ class Server:
         self.totalquestions = 0
         self.do_trivia = False
         self.accept = True
+        self.path = os.path.join('./botstuff/servers/', servid)
+        self.usersfile = os.path.join(self.path, 'Users.json')
+        self.questions = os.path.join(self.path, 'questions.json')
+        self.userdict = {}
 
-        os.makedirs(os.path.join("./botstuff/servers", self.id, 'pickled'), exist_ok = True)
-        self.usersfile = os.path.join('./botstuff/servers/', servid, 'Users.json')
+        os.makedirs(os.path.join("./botstuff/servers", self.id, 'session'), exist_ok = True)
 
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
                 f.write("{\n}")
-            self.userdict = {}
         else:
             with open(self.usersfile, 'r', encoding = 'UTF-8') as f:
                 try:
                     di = json.loads(f.read())
-                    self.userdict = {}
-                    for k in di.keys():
-                        member = discord.utils.get(bot.connection._servers[self.id].members, id = k)
-                        user = User(member, self.id)
-                        self.userdict[member.id] = user
                 except json.decoder.JSONDecodeError:
-                    self.userdict = {}
+                    di = None
+                if di:
+                    for usrid in di.keys():
+                        user = User(usrid, self.id)
+                        self.userdict[usrid] = user
 
-    def init_server(self):
-        questionls = []
-        for i in os.listdir(os.path.join("./botstuff/servers", self.id, 'pickled')):
-            with open(os.path.join("./botstuff/servers", self.id, 'pickled', i), 'rb') as picklefile:
-                question = pickle.load(picklefile)
-            questionls.append(question)
-        else:
-            try:
-                shutil.copytree("./botstuff/question_src", os.path.join("./botstuff/servers", self.id, 'question_src'))
-            except FileExistsError:
-                shutil.rmtree(os.path.join("./botstuff/servers", self.id, 'question_src'))
-                shutil.copytree("./botstuff/question_src", os.path.join("./botstuff/servers", self.id, 'question_src'))
-            questionls = load_json(os.path.join("./botstuff/servers", self.id))
-        self.wasinit = True
-        self.questionlist = questionls
-        self.totalquestions = len(questionls)
+        if not os.path.isfile(self.questions):
+            shutil.copy2('./botstuff/questions.json', self.questions)
+            with open(self.questions, 'r', encoding = 'UTF-8') as file:
+                self.questionlist = json.loads(file.read())
+            self.totalquestions = len(self.questionlist)
 
     def resetquestions(self):
-        shutil.rmtree(os.path.join("./botstuff/servers", self.id, 'pickled'))
-        os.makedirs(os.path.join("./botstuff/servers", self.id, 'pickled'), exist_ok = True)
+        shutil.rmtree(os.path.dirname(self.questions))
+        os.makedirs(os.path.dirname(self.questions), exist_ok = True)
+
+        shutil.copy2('./botstuff/questions.json', self.questions)
+        with open(self.questions, 'r', encoding = 'UTF-8') as file:
+            self.questionlist = json.loads(file.read())
+        self.totalquestions = len(self.questionlist)
+
+        self.resetscores()
 
     def resetscores(self):
         try:
-            os.remove(os.path.join('./botstuff/servers', self.id, 'Users.json'))
+            os.remove(self.usersfile)
         except FileNotFoundError:
             pass
         self.userdict = {}
+
+    def nextquestion(self):
+        self.questionlist.pop(self.questionlist.index(self.q))
+        with open(self.questions, 'w', encoding = 'UTF-8') as file:
+            file.write(json.dumps(self.questionlist))
+        self.already_answered = []
+
+        if self.questionlist:
+            return False
+        else:
+            return True
 
 
 class TriviaCommands:
@@ -152,9 +130,7 @@ class TriviaCommands:
         os.makedirs("./botstuff/servers", exist_ok = True)
 
         for i in os.listdir("./botstuff/servers"):
-            server = Server(i, self.bot)
-            server.init_server()
-            self.serverdict[i] = server
+            self.serverdict[i] = Server(i)
 
     @commands.command(pass_context = True)
     async def starttrivia(self, ctx):
@@ -195,14 +171,13 @@ class TriviaCommands:
         print('Question "{}" dispensed to {}.'.format(server.q.question, ctx.message.server))
 
     @staticmethod
-    def dispense(server, ctx):
+    def dispense(server: Server, ctx):
         print("Dispensing question to {}...".format(ctx.message.server))
         if not server.questionlist:
             print("-" * 12)
             print("Ran out of questions in {}. Resetting question list...".format(ctx.message.server))
             print("-" * 12)
-            server.init_server()
-            server.resetscores()
+            server.resetquestions()
         server.q = server.questionlist[0]
 
         return server
@@ -216,32 +191,19 @@ class TriviaCommands:
         server = self.getserver(ctx)
         if server.q:
             print("{} in {} is trying to bypass a question.".format(ctx.message.author, ctx.message.server))
-            b = self.bypassquestion(server)
+            b = server.nextquestion()
             await self.bot.say('Question "{}" thrown off stack.'.format(server.q.question))
             if b:
                 print("Out of questions. displaying scoreboard...")
                 await self.bot.say("That's all I have, folks!")
                 embed = self.getscoreboard(server, ctx)
                 await self.bot.say(embed = embed)
-                server.resetscores()
+                server.resetquestions()
                 print("Scoreboard displayed")
         else:
             print("{0} in {1} is trying to bypass a question which hasn't been asked. {0} pls"
                   .format(ctx.message.author, ctx.message.server))
             await self.bot.say("There is no question to bypass.")
-
-    @staticmethod
-    def bypassquestion(server):
-        server.questionlist.pop(server.questionlist.index(server.q))
-        os.remove(os.path.join("./botstuff/servers", server.id, 'pickled', str(server.q.qno) + '.q'))
-        del server.q
-        server.q = None
-        server.already_answered = []
-
-        if server.questionlist:
-            return False
-        else:
-            return True
 
     @commands.command(pass_context = True)
     async def a(self, ctx, *, answer: str = None):
@@ -264,32 +226,29 @@ class TriviaCommands:
                 if answer.lower() == server.q.answer.lower() or numanswer == server.q.answerno:
                     print("{} answered correctly.".format(str(ctx.message.author)))
                     print("-" * 12)
-                    user.answered_correctly += 1
-                    user.write()
-                    server.accept = True
+                    user.add_correct()
                     await self.bot.say("Congratulations, {}! You got it!".format(ctx.message.author.mention))
-                    done = self.bypassquestion(server)
+                    done = server.nextquestion()
                     if done:
                         print("Out of questions. displaying scoreboard...")
                         await self.bot.say("That's all I have, folks!")
                         embed = self.getscoreboard(server, ctx)
                         await self.bot.say(embed = embed)
-                        server.resetscores()
+                        server.resetquestions()
                         print("Scoreboard displayed")
                 else:
-                    user.answered_incorrectly += 1
-                    server.accept = True
+                    user.add_incorrect()
                     print("{} answered incorrectly.".format(str(ctx.message.author)))
                     await self.bot.say("Wrong answer, {}.".format(ctx.message.author.mention))
 
             elif server.q and not answer:
                 print(".. this question: {}".format(server.q.question))
                 print(".. with an empty answer! {} pls".format(ctx.message.author))
-                server.accept = True
             else:
                 print(".. a non-existent question! {} pls".format(ctx.message.author))
-                server.accept = True
                 await self.bot.say("No question was asked. Get a question first with `^trivia`.")
+
+        server.accept = True
 
     @commands.command(pass_context = True, hidden = True)
     @permissionChecker(check = "is_owner")
@@ -297,8 +256,6 @@ class TriviaCommands:
         server = self.getserver(ctx)
         print("Resetting questions in {}...".format(ctx.message.server))
         server.resetquestions()
-        server.init_server()
-        server.resetscores()
         print("Questions reset.")
         print("-" * 12)
         await self.bot.say("Questions reset.")
@@ -355,9 +312,7 @@ class TriviaCommands:
         """
         Get number of questions.
         """
-
         server = self.getserver(ctx)
-
         await self.bot.say("I have a total of {} questions, {} of which has been answered, and {} remain unanswered."
                            .format(server.totalquestions, server.totalquestions - len(server.questionlist),
                                    len(server.questionlist)))
@@ -366,9 +321,8 @@ class TriviaCommands:
         try:
             server = self.serverdict[ctx.message.server.id]
         except KeyError:
-            server = Server(ctx.message.server.id, self.bot)
+            server = Server(ctx.message.server.id)
             self.serverdict[ctx.message.server.id] = server
-            server.init_server()
 
         return server
 
@@ -394,8 +348,7 @@ class TriviaCommands:
         sortls = sorted(server.userdict.values(), key = lambda user: user.answered_correctly, reverse = True)
         for usr in sortls:
             member = discord.utils.get(ctx.message.server.members, mention = usr.mention)
-            name = member.display_name
-            userls += name + '\n'
+            userls += member.name + '\n'
             numls += str(usr.answered_correctly) + '\n'
             sepls += ':\n'
         embed = discord.Embed(title = "Scoreboard", color = discord.Color.blue())
@@ -410,103 +363,6 @@ class TriviaCommands:
         embed.add_field(name = 'Scores', value = numls)
 
         return embed
-
-    # @commands.command(pass_context = True)
-    # async def suggest(self, ctx, *args):
-    #     """
-    #     Suggest a question.
-    #     Requests to supply info timeout after 20 seconds.
-    #     Be sure to include the letter s with the command prefix after it, such as:
-    #     s^ *your stuff here*
-    #     Alternatively, you may suggest an question in one message, using this format:
-    #     ^suggest *question* *option1* *option2* *option3* *option4* *answer(as a number)*
-    #     if a parameter consists of more than one word, you'll have to put it inside quotes.
-    #     """
-    #     print("{} in {} is trying to suggest a question.".format(ctx.message.author, ctx.message.server))
-    #     if args:
-    #         if len(args) == 6:
-    #             que = args[0]
-    #             op1 = args[1]
-    #             op2 = args[2]
-    #             op3 = args[3]
-    #             op4 = args[4]
-    #             answno = args[5]
-    #             answ = args[int(answno)]
-    #
-    #             os.makedirs("./botstuff/suggested", exist_ok = True)
-    #             fileno = len(os.listdir("./botstuff/suggested"))
-    #             with open(os.path.join("./botstuff/suggested", "q{}.json".format(fileno)), 'w',
-    #                       encoding = "UTF-8") as file:
-    #                 file.write(jsontemplate.format(que, op1, op2, op3, op4, answ, answno))
-    #             print("{} in {} suggested: {}\n"
-    #                   "    option 1: {}\n"
-    #                   "    option 2: {}\n"
-    #                   "    option 3: {}\n"
-    #                   "    option 4: {}\n"
-    #                   "    The correct answer is no.{}: {}".format(ctx.message.author, ctx.message.server, que, op1,
-    #                                                                op2, op3, op4, answno, answ))
-    #             print("-" * 12)
-    #             await self.bot.say("Your suggestion has been submitted. Dank.")
-    #         else:
-    #             print("Unrecognized format")
-    #             print("-" * 12)
-    #             await self.bot.say("Incorrect format. Type ^help suggest for help using this command.")
-    #     else:
-    #         def check1(msg):
-    #             if re.search("(s\^)\s(.*?)(\?)", msg.content):
-    #                 return True
-    #             else:
-    #                 return False
-    #
-    #         def check2(msg):
-    #             if re.search("(s\^)\s(.*?)", msg.content):
-    #                 return True
-    #             else:
-    #                 return False
-    #
-    #         def check3(msg):
-    #             if re.search("(s\^)\s([1-4]+?)", msg.content):
-    #                 try:
-    #                     int(re.search("(s\^)\s([1-4]+?)", msg.content).group(2))
-    #                     return True
-    #                 except ValueError:
-    #                     return False
-    #             else:
-    #                 return False
-    #
-    #         timeout = 20
-    #         await self.bot.say("Write the question:")
-    #         ques = await self.bot.wait_for_message(timeout, author = ctx.message.author,
-    #                                                channel = ctx.message.channel, check = check1)
-    #         ques = re.search("(s\^)\s(.*\?)", ques.content).group(2)
-    #         print("{} suggests: {}".format(ctx.message.author, ques))
-    #         if ques:
-    #             opls = []
-    #             for i in range(1, 5):
-    #                 await self.bot.say("Write option {}:".format(str(i)))
-    #                 op = await self.bot.wait_for_message(timeout, author = ctx.message.author,
-    #                                                      channel = ctx.message.channel,
-    #                                                      check = check2)
-    #                 if not op:
-    #                     return
-    #                 op = re.search("(s\^)\s(.*)", op.content).group(2)
-    #                 print("    option {}: {}".format(i, op))
-    #                 opls.append(op)
-    #             await self.bot.say("Which is the right answer? (Enter a number pl0x)")
-    #             answno = await self.bot.wait_for_message(timeout, author = ctx.message.author,
-    #                                                      channel = ctx.message.channel,
-    #                                                      check = check3)
-    #             if not answno:
-    #                 return
-    #             answno = int(re.search("(s\^)\s([1-4])", answno.content).group(2))
-    #             answ = opls[answno - 1]
-    #             print("    The correct answer is no. {}: {}".format(answno, answ))
-    #             os.makedirs("./botstuff/suggested", exist_ok = True)
-    #             fileno = len(os.listdir("./botstuff/suggested"))
-    #             with open(os.path.join("./botstuff/suggested", "q{}.json".format(fileno)), 'w',
-    #                       encoding = "UTF-8") as file:
-    #                 file.write(jsontemplate.format(ques, opls[0], opls[1], opls[2], opls[3], answ, answno))
-    #             await self.bot.say("Your suggestion has been submitted. Dank.")
 
 
 def setup(bot):
