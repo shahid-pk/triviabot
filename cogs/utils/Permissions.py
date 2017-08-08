@@ -27,16 +27,15 @@ def permissionChecker(**kwargs):
         # Checks if it's an owner
         if author.id in settings['Owner IDs'] + owners:
             return True
+        # Sees if the author is the server owner
+        elif server.owner.id == author.id:
+            return True
         elif check == 'is_owner':
             return False
 
         # Checks if it's a PM
         if server is None:
             return False
-
-        # Sees if the author is the server owner
-        if server.owner.id == author.id:
-            return True
 
         # Looks at the person to compare against
         if compare:

@@ -4,13 +4,14 @@ from discord.ext import commands
 import discord
 import os
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 description = \
-    """TriviaBot"""
+    """Hey boys, I'm a bot written by your OG Ala to provide you with useless trivia."""
+prefix = ","
 
 bot = commands.Bot(
-    command_prefix = "^",
+    command_prefix = prefix,
     description = description,
 )
 
@@ -22,7 +23,7 @@ async def on_ready():
     print(bot.user.id)
     print("-" * 12)
 
-    await bot.change_presence(game = discord.Game(name = "^help"))
+    await bot.change_presence(game = discord.Game(name = "{}help".format(prefix)))
 
     for i in os.listdir("./cogs"):
         if os.path.isfile(os.path.join("./cogs", i)):
