@@ -79,9 +79,17 @@ class StaffCommands:
     @permissionChecker(check = perm)
     async def resetscore(self, ctx):
         """
-        Resets the caller's score.
+        Resets a user's score.
+        You may reset someone else's score by mentioning them.
         """
-        user = getuser(self.serverdict, ctx)
+        try:
+            m = ctx.message.mentions[0]
+        except IndexError:
+            m = False
+        if m:
+            user = getuser(self.serverdict, ctx, mentions = True)
+        else:
+            user = getuser(self.serverdict, ctx)
         self.serverdict[ctx.message.server.id].userdict.pop(user.id)
         await self.bot.say("{}'s score has been reset.".format(user.mention))
 

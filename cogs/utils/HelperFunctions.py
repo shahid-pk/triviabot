@@ -64,9 +64,13 @@ class Server:
         self.do_trivia = False
         self.accept = True
         self.path = os.path.join('./botstuff/servers/', servid)
+        os.makedirs(self.path, exist_ok = True)
         self.usersfile = os.path.join(self.path, 'Users.json')
         self.questions = os.path.join(self.path, 'questions.json')
         self.userdict = {}
+        if not os.path.isfile(self.usersfile):
+            with open(self.usersfile, 'w', encoding = "UTF-8") as f:
+                f.write("{\n}")
 
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
