@@ -19,7 +19,7 @@ class TriviaCommands:
         if answer is not None and ctx.message.author.id not in server.already_answered:
             print("{} in {} is trying to answer...".format(ctx.message.author, ctx.message.server))
             server.already_answered.append(ctx.message.author.id)
-            if server.q and answer:
+            if server.q:
                 print(".. this question: {}".format(server.q['question']))
                 try:
                     numanswer = int(answer)
@@ -48,10 +48,6 @@ class TriviaCommands:
                     user.add_incorrect()
                     print("{} answered incorrectly.".format(str(ctx.message.author)))
                     await self.bot.say("Wrong answer, {}.".format(ctx.message.author.mention))
-
-            elif server.q and not answer:
-                print(".. this question: {}".format(server.q['question']))
-                print(".. with an empty answer! {} pls".format(ctx.message.author))
             else:
                 print(".. a non-existent question! {} pls".format(ctx.message.author))
                 await self.bot.say("No question was asked. Get a question first with `^trivia`.")

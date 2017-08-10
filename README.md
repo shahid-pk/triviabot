@@ -5,7 +5,12 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
 
 # Changelog:
 
-####  Version 1.2.2:
+#### Version 1.2.3:
+
+  - TriviaCommands.py:
+    - Removed some redundant checks in `,a`.
+
+#### Version 1.2.2:
 
   - TriviaCommands.py:
     - Bot now notifies if a user tries to answer after already using up their answer.
@@ -14,14 +19,14 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
     - Bot no longer accepts empty `,a` commands.
   - Added README.md.
 
-####  Version 1.2.1:
+#### Version 1.2.1:
 
   - HelperFunctions.py:
     - Fixed an error which occurs if the server's directory did not exist(Yes, I know, should've seen this coming).
   - StaffCommands.py:
     - `,resetscore` can now be used to reset someone else's score by mentioning them.
 
-###  Version 1.2:
+### Version 1.2:
 
   - Rewrote a great deal of code.
   - TriviaCommands.py:
@@ -32,7 +37,7 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
     - Contains staff-specific commands.
   - Changed prefix to `,`.
 
-####  Version 1.1.1:
+#### Version 1.1.1:
 
   - TriviaCommands.py:
     - Returned bot to working order.
@@ -44,7 +49,7 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
     - Added shortcuts for cog-reloading. ^rld tc for TriviaCommands, and ^rld gc for OwnerCommands.
   - Discovered aliases. Went bonkers.
 
-###  Version 1.1:
+### Version 1.1:
 
   - TriviaCommands.py:
     - Combined question jsons into one json file.
@@ -60,6 +65,6 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
     - Usage help: Place all questions.json in `./botstuff/jsonfiles`. Rename if necessary. Run `process_files.py`,
       and they'll automatically be added to the main `questions.json` file.
 
-###  Version 1.0:
+### Version 1.0:
 
   - Initial release.
