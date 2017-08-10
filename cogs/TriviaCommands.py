@@ -16,8 +16,7 @@ class TriviaCommands:
         server = getserver(self.serverdict, ctx)
         user = getuser(self.serverdict, ctx)
 
-        if server.accept and ctx.message.author.id not in server.already_answered:
-            server.accept = False
+        if answer is not None and ctx.message.author.id not in server.already_answered:
             print("{} in {} is trying to answer...".format(ctx.message.author, ctx.message.server))
             server.already_answered.append(ctx.message.author.id)
             if server.q and answer:
@@ -26,7 +25,9 @@ class TriviaCommands:
                     numanswer = int(answer)
                 except ValueError:
                     numanswer = 0
-                if answer.lower() == server.q['answer'].lower() or numanswer == int(server.q['answerno']):
+                if server.accept and \
+                        (answer.lower() == server.q['answer'].lower() or numanswer == int(server.q['answerno'])):
+                    server.accept = False
                     print("{} answered correctly.".format(str(ctx.message.author)))
                     print("-" * 12)
                     user.add_correct()
@@ -39,6 +40,10 @@ class TriviaCommands:
                         await self.bot.say(embed = embed)
                         server.resetquestions()
                         print("Scoreboard displayed")
+                    server.accept = True
+                elif answer.lower() == server.q['answer'].lower() or numanswer == int(server.q['answerno']):
+                    print("{} answered correctly, but was too slow!".format(ctx.message.author))
+                    await self.bot.say("Too slow, {}!".format(ctx.message.author.mention))
                 else:
                     user.add_incorrect()
                     print("{} answered incorrectly.".format(str(ctx.message.author)))
@@ -50,8 +55,8 @@ class TriviaCommands:
             else:
                 print(".. a non-existent question! {} pls".format(ctx.message.author))
                 await self.bot.say("No question was asked. Get a question first with `^trivia`.")
-
-        server.accept = True
+        elif ctx.message.author.id in server.already_answered:
+            await self.bot.say("You've already used up your answer, {}.".format(ctx.message.author.mention))
 
     @commands.command(pass_context = True, aliases = ['leaderboard', 'board'])
     async def scoreboard(self, ctx):
