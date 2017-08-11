@@ -5,6 +5,11 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
 
 # Changelog:
 
+#### Version 1.2.6:
+
+  - Fixed the dumbest error in existence.
+  - Added the `,ev` command. May be useful in debugging. Owner only, of course.
+
 #### Version 1.2.5:
 
   - Better logging.

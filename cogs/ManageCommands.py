@@ -1,4 +1,7 @@
 import re
+from sys import exc_info
+from traceback import format_exception
+
 from discord.ext import commands
 from discord import Status
 from cogs.utils.Permissions import permissionChecker
@@ -72,6 +75,20 @@ class ManageCommands:
         Display the bot's version.
         """
         await self.bot.say("I am at version {}.".format(__version__))
+
+    @commands.command()
+    @permissionChecker(check = perm)
+    async def ev(self, *, content):
+        """
+        Evaluate python expression.
+        """
+        try:
+            output = eval(content)
+        except Exception:
+            type_, value_, traceback_ = exc_info()
+            ex = format_exception(type_, value_, traceback_)
+            output = ''.join(ex)
+        await self.bot.say('```python\n{}```'.format(output))
 
 
 def setup(bot):
