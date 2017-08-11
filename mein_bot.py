@@ -4,7 +4,7 @@ from discord.ext import commands
 import discord
 import os
 
-__version__ = '1.2.3'
+__version__ = '1.2.5'
 
 description = \
     """Hey boys, I'm a bot written by your OG Ala to provide you with useless trivia."""
@@ -28,7 +28,7 @@ async def on_ready():
     for i in os.listdir("./cogs"):
         if os.path.isfile(os.path.join("./cogs", i)):
             i = i.split('.')[0]
-            print("Loading extension: {0}".format(i))
+            print("Loading extension: {0}".format(i), end = '\r')
             bot.load_extension("cogs.{0}".format(i))
             print("Extension {0} loaded.".format(i))
 

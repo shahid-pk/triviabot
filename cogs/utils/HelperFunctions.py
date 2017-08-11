@@ -115,12 +115,12 @@ class Server:
 
     def nextquestion(self):
         self.questionlist.pop(self.questionlist.index(self.q))
+        self.already_answered = []
         if not self.questionlist:
             self.do_trivia = False
         self.q = None
         with open(self.questions, 'w', encoding = 'UTF-8') as file:
             file.write(json.dumps(self.questionlist, indent = 4))
-        self.already_answered = []
 
         if self.questionlist:
             return False
@@ -177,12 +177,12 @@ def getscoreboard(server, ctx):
 
 
 def dispense(server: Server, ctx):
-    print("Dispensing question to {}...".format(ctx.message.server))
     if not server.questionlist:
         print("-" * 12)
         print("Ran out of questions in {}. Resetting question list...".format(ctx.message.server))
         print("-" * 12)
         server.resetquestions()
+    print("Dispensing question to {}...".format(ctx.message.server), end = ' ')
     server.q = server.questionlist[0]
 
     return server

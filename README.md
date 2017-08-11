@@ -5,6 +5,12 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
 
 # Changelog:
 
+#### Version 1.2.5:
+
+  - Better logging.
+  - ManageCommands.py:
+    - Retroactive cog reload shortcuts; they depend on the capital letters in a given file name. For example, ManageCommands.py has a shortcut of `mc`.
+
 #### Version 1.2.4:
 
   - HelperFunctions.py:

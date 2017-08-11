@@ -1,3 +1,4 @@
+import re
 from discord.ext import commands
 from discord import Status
 from cogs.utils.Permissions import permissionChecker
@@ -10,6 +11,17 @@ perm = 'is_owner'
 class ManageCommands:
     def __init__(self, bot):
         self.bot = bot
+
+        self.cogdict = {}
+        for i in os.listdir('./cogs/'):
+            if os.path.isfile(os.path.join('./cogs/' + i)):
+                x = re.sub('[a-z.]', '', i).lower()
+                try:
+                    if self.cogdict[x]:
+                        x += '-'
+                except KeyError:
+                    pass
+                self.cogdict[x] = i.split('.')[0]
 
     @commands.command(aliases = ['delet'])
     @permissionChecker(check = perm)
@@ -27,13 +39,8 @@ class ManageCommands:
         """
         Reloads a cog. Owner only.
         """
-        cogdict = {
-            'tc': 'TriviaCommands',
-            'mc': 'ManageCommands',
-            'sc': 'StaffCommands'
-        }
         try:
-            extension = cogdict[extension]
+            extension = self.cogdict[extension]
         except KeyError:
             pass
 

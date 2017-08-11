@@ -36,12 +36,13 @@ class StaffCommands:
                     break
                 if not server.q:
                     server = dispense(server, ctx)
+                    server = dispense(server, ctx)
                     await self.bot.say(
                         server.q['question'] + "\n" + qmsg.format(server.q['options']['op1'],
                                                                   server.q['options']['op2'],
                                                                   server.q['options']['op3'],
                                                                   server.q['options']['op4']))
-                    print('Question "{}" dispensed to {}.'.format(server.q['question'], ctx.message.server))
+                    print('"{}" dispensed.'.format(server.q['question']))
                 elif retellq:
                     retellq = False
                     await self.bot.say(
@@ -73,7 +74,7 @@ class StaffCommands:
         await self.bot.say(
             server.q['question'] + "\n" + qmsg.format(server.q['options']['op1'], server.q['options']['op2'],
                                                       server.q['options']['op3'], server.q['options']['op4']))
-        print('Question "{}" dispensed to {}.'.format(server.q['question'], ctx.message.server))
+        print('"{}" dispensed.'.format(server.q['question']))
 
     @commands.command(pass_context = True)
     @permissionChecker(check = perm)
@@ -122,7 +123,7 @@ class StaffCommands:
         Resets/starts over the questions.
         """
         server = getserver(self.serverdict, ctx)
-        print("Resetting questions in {}...".format(ctx.message.server))
+        print("Resetting questions in {}...".format(ctx.message.server), end = ' ')
         server.resetquestions()
         print("Questions reset.")
         print("-" * 12)
@@ -139,19 +140,19 @@ class StaffCommands:
         """
         server = getserver(self.serverdict, ctx)
         if server.q:
-            print("{} in {} is trying to bypass a question.".format(ctx.message.author, ctx.message.server))
+            print("{} in {} is trying to bypass a question...".format(ctx.message.author, ctx.message.server), end = ' ')
             await self.bot.say('Question "{}" thrown off stack.'.format(server.q['question']))
+            print('Bypassed "{}".'.format(server.q['question']))
             b = server.nextquestion()
             if b:
-                print("Out of questions. displaying scoreboard...")
+                print("Out of questions. displaying scoreboard...", end = ' ')
                 await self.bot.say("That's all I have, folks!")
                 embed = getscoreboard(server, ctx)
                 await self.bot.say(embed = embed)
                 server.resetquestions()
                 print("Scoreboard displayed")
         else:
-            print("{0} in {1} is trying to bypass a question which hasn't been asked. {0} pls"
-                  .format(ctx.message.author, ctx.message.server))
+            print("which hasn't been asked! {0} pls".format(ctx.message.author))
             await self.bot.say("There is no question to bypass.")
 
 
