@@ -5,6 +5,11 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
 
 # Changelog:
 
+#### Version 1.2.4:
+
+  - HelperFunctions.py:
+    - Hopefully™ fixed the `User` class's `mention` property.
+    
 #### Version 1.2.3:
 
   - TriviaCommands.py:

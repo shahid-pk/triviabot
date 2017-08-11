@@ -12,11 +12,11 @@ qmsg = """Options:
 
 
 class User:
-    def __init__(self, usrid, serverid):
+    def __init__(self, usrid, serverid, mention):
         self.answered_correctly = 0
         self.answered_incorrectly = 0
         self.id = usrid
-        self.mention = '<@{}>'.format(usrid)
+        self.mention = mention
         self.usersfile = os.path.join('./botstuff/servers/', serverid, 'Users.json')
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
@@ -82,8 +82,8 @@ class Server:
                 except json.decoder.JSONDecodeError:
                     di = None
             if di:
-                for usrid in di.keys():
-                    user = User(usrid, self.id)
+                for usrid, vls in di.items():
+                    user = User(usrid, self.id, vls[2])
                     user.read()
                     self.userdict[usrid] = user
 
@@ -146,7 +146,7 @@ def getuser(serverdict, ctx, mentions = False):
     try:
         user = serverdict[ctx.message.server.id].userdict[member.id]
     except KeyError:
-        user = User(member.id, ctx.message.server.id)
+        user = User(member.id, ctx.message.server.id, member.mention)
         serverdict[ctx.message.server.id].userdict[member.id] = user
 
     return user
