@@ -4,7 +4,7 @@ from discord.ext import commands
 import discord
 import os
 
-__version__ = '1.2.6'
+__version__ = '1.2.7'
 
 description = \
     """Hey boys, I'm a bot written by your OG Ala to provide you with useless trivia."""
