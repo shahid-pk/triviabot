@@ -5,6 +5,10 @@ Not hosted; not open for public usage. You are, however, welcome to host your ow
 
 # Changelog:
 
+#### Version 1.2.8:
+
+  - I have no Idea what I did, but bugs were fixed. Many bugs.
+
 #### Version 1.2.7:
 
   - Minor message fixes.
