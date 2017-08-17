@@ -104,3 +104,6 @@ Contact me on discord: `ala#2941`
   - Added `,restartbot` command. Does what you expect it to.
   - Bot now automatically removes all incorrect messages after a 2 second timeout.
   - Bot now uses emoji(May I be forgiven for this) to indicate the response at a glace.
+  
+#### Version 1.3.1
+  - Adjusted timeout before removing messages
