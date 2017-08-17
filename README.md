@@ -107,3 +107,6 @@ Contact me on discord: `ala#2941`
   
 #### Version 1.3.1
   - Adjusted timeout before removing messages
+  
+#### Version 1.3.2
+  - Fixed some un-`await`ed calls.
