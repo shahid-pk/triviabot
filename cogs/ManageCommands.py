@@ -116,10 +116,14 @@ class ManageCommands:
         :return:
         """
         msg = await self.bot.say("Restarting...")
+        print('Restarting...')
         await self.bot.change_presence(status = Status.dnd, game = None)
 
         # calls the command to start the bot, and passes the message's id, so the bot can edit it when it starts.
-        os.execl(executable, *([executable] + [argv[0], argv[1]] + [msg.id, msg.channel.id]))
+        if os.name == 'nt':
+            os.spawnl(os.P_NOWAIT, executable, *([executable] + [argv[0], argv[1]] + [msg.id, msg.channel.id]))
+        else:
+            os.execl(executable, *([executable] + [argv[0], argv[1]] + [msg.id, msg.channel.id]))
 
 def setup(bot):
     x = ManageCommands(bot)

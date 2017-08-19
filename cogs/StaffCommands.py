@@ -61,10 +61,10 @@ class StaffCommands:
 
                     # nicely format the question
                     await self.bot.say(
-                        server.q['question'] + "\n" + qmsg.format(server.q['options']['op1'],
-                                                                  server.q['options']['op2'],
-                                                                  server.q['options']['op3'],
-                                                                  server.q['options']['op4']))
+                        server.q['question'] + "\n" + qmsg.format(server.q['options'][0],
+                                                                  server.q['options'][1],
+                                                                  server.q['options'][2],
+                                                                  server.q['options'][3]))
 
                     print('"{}" dispensed.'.format(server.q['question']))
 
@@ -73,10 +73,10 @@ class StaffCommands:
                 elif retellq:
                     retellq = False
                     await self.bot.say(
-                        server.q['question'] + "\n" + qmsg.format(server.q['options']['op1'],
-                                                                  server.q['options']['op2'],
-                                                                  server.q['options']['op3'],
-                                                                  server.q['options']['op4']))
+                        server.q['question'] + "\n" + qmsg.format(server.q['options'][0],
+                                                                  server.q['options'][1],
+                                                                  server.q['options'][2],
+                                                                  server.q['options'][3]))
                     print('Retold question "{}" in {}.'.format(server.q['question'], ctx.message.server))
 
                 # async sleep for 2 seconds.
@@ -104,8 +104,8 @@ class StaffCommands:
         # set the server.q property to the question at the top of the question list, and send it.
         server.dispense(ctx)
         await self.bot.say(
-            server.q['question'] + "\n" + qmsg.format(server.q['options']['op1'], server.q['options']['op2'],
-                                                      server.q['options']['op3'], server.q['options']['op4']))
+            server.q['question'] + "\n" + qmsg.format(server.q['options'][0], server.q['options'][1],
+                                                      server.q['options'][2], server.q['options'][3]))
         print('"{}" dispensed.'.format(server.q['question']))
 
     @commands.command(pass_context = True)

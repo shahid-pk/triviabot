@@ -1,4 +1,4 @@
-#!usr/env/bin python
+#! python3.6
 from sys import argv, exc_info
 from traceback import format_exception
 
@@ -7,7 +7,7 @@ import discord
 import os
 
 try:
-    __version__ = '1.3.3'
+    __version__ = '1.3.4'
 
     description = \
         """Hey boys, I'm a bot written by your OG Ala to provide you with useless trivia."""
@@ -22,6 +22,8 @@ try:
 
     @bot.event
     async def on_ready():
+        if len(argv) > 2:
+            print('Restarted successfully. \n' + '-' * 12)
         print("Logged in successfully")
         print(bot.user.name)
         print(bot.user.id)
@@ -42,7 +44,7 @@ try:
         try:
             if len(argv) > 2:
                 msg = await bot.get_message(bot.get_channel(argv[3]), argv[2])
-                await bot.edit_message(msg, msg.content +  "\nRestarted successfully")
+                await bot.edit_message(msg, msg.content + "\nRestarted successfully")
         except IndexError:
             pass
 
@@ -51,11 +53,13 @@ try:
 
     if __name__ == '__main__':
         bot.run(argv[1])
+
 except Exception:
     type_, value_, traceback_ = exc_info()
     ex = format_exception(type_, value_, traceback_)
     output = ''.join(ex)
 
+    print(output)
     with open('error.txt', 'w', encoding = 'UTF-8') as f:
         f.write(str(output))
     exit(1)

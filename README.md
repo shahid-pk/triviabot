@@ -113,3 +113,10 @@ Contact me on discord: `ala#2941`
   
 #### Version 1.3.3
   - Fixed case sensitivity in `,a`
+  - Bot now writes errors to `error.txt`
+  
+#### Version 1.3.4
+  - Added excel2json to project
+  - Optimized questions.json format
+  - Bot now writes errors to `error.txt` AND prints it into the command window.
+  - The restart command is now more or less reliable.
