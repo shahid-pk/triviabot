@@ -1,4 +1,6 @@
 import json
+import random
+
 import discord
 import os
 import shutil
@@ -15,10 +17,11 @@ class User:
     """
     represents a User
     """
-    def __init__(self, usrid, serverid, mention):
+    def __init__(self, member, serverid, mention, name):
         self.points = 0
-        self.id = usrid
+        self.id = member
         self.mention = mention
+        self.name = name
         self.usersfile = os.path.join('./botstuff/servers/', serverid, 'Users.json')
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
@@ -30,7 +33,7 @@ class User:
                 dictionary = json.loads(f.read())
             except json.decoder.JSONDecodeError:
                 dictionary = {}
-        dictionary[self.id] = [self.points, self.mention]
+        dictionary[self.id] = [self.points, self.mention, self.name]
         with open(self.usersfile, 'w', encoding = "UTF-8") as f:
             f.write(json.dumps(dictionary, indent = 4))
 
@@ -43,6 +46,7 @@ class User:
         try:
             self.points = dictionary[self.id][0]
             self.mention = dictionary[self.id][1]
+            self.name = dictionary[self.id][2]
         except KeyError:
             pass
 
@@ -104,7 +108,7 @@ class Server:
             # if decoding the dictionary works, convert into `User` objects and load them into `self.userdict`
             if di:
                 for usrid, vls in di.items():
-                    user = User(usrid, self.id, vls[1])
+                    user = User(usrid, self.id, vls[1], vls[2])
                     user.read()
                     self.userdict[usrid] = user
 
@@ -207,14 +211,14 @@ class Server:
             print("-" * 12)
             self.resetquestions()
         print("Dispensing question to {}...".format(ctx.message.server))
-        # set the current question to the first item in questionlist
-        self.q = self.questionlist[0]
+        # set the current question to a random item in questionlist
+        if not self.q:
+            self.q = random.choice(self.questionlist)
 
-    def getscoreboard(self, ctx) -> discord.Embed:
+    def getscoreboard(self) -> discord.Embed:
         """
         constructs a scoreboard from the server's Users.json file
 
-        :param ctx: the context
         :return: an Embed object
         """
         # a string of usernames separated by linebreaks
@@ -232,8 +236,7 @@ class Server:
         # construct the columns which are going to be used in the fields
         for usr in sortls:
             # get the discord.Member object from the server member list using the member's mention
-            member = discord.utils.get(ctx.message.server.members, mention = usr.mention)
-            userls += member.name + '\n'
+            userls += usr.name + '\n'
             numls += str(usr.points) + '\n'
             sepls += 'َ\n'
 
@@ -295,7 +298,7 @@ def getuser(serverdict, ctx, mentions = False) -> User:
     try:
         user = serverdict[ctx.message.server.id].userdict[member.id]
     except KeyError:
-        user = User(member.id, ctx.message.server.id, member.mention)
+        user = User(member.id, ctx.message.server.id, member.mention, member.name)
         serverdict[ctx.message.server.id].userdict[member.id] = user
 
     return user

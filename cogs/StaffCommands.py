@@ -198,7 +198,7 @@ class StaffCommands:
             if b:
                 print("Out of questions. displaying scoreboard...", end = ' ')
                 await self.bot.say("That's all I have, folks!")
-                embed = server.getscoreboard(ctx)
+                embed = server.getscoreboard()
                 await self.bot.say(embed = embed)
                 server.resetquestions()
                 print("Scoreboard displayed")

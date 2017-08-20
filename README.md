@@ -120,3 +120,6 @@ Contact me on discord: `ala#2941`
   - Optimized questions.json format
   - Bot now writes errors to `error.txt` AND prints it into the command window.
   - The restart command is now more or less reliable.
+  
+#### Version 1.3.5
+  - Scoreboard fetching is new a bit better-- the user class now has a `name` property, instead of getting a new `member` object for each member there is.
