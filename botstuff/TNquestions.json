@@ -1,0 +1,12 @@
+[
+    {
+        "question": "what's the name of this spreadsheet?",
+        "options": [
+            "trivia questions",
+            "trivia example",
+            "trivia stuff",
+            "fook off mate"
+        ],
+        "answer": "trivia example"
+    }
+]
