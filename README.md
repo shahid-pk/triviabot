@@ -123,3 +123,9 @@ Contact me on discord: `ala#2941`
   
 #### Version 1.3.5
   - Scoreboard fetching is new a bit better-- the user class now has a `name` property, instead of getting a new `member` object for each member there is.
+
+
+### Version 1.4
+  - Added TriviaNight mode. Basically, now everyone can get questions from the normal questions.json file, by default. You enable TriviaNight, and the questions file gets switched out for another one, and all commands get locked down, like on previous versions.
+  - Refactored `Helperfunctions.py` into `TriviaBackend.py`
+  - Added `,tn` and `,endtrivianight` commands, for toggling TriviaNight mode and "officially" ending it and migrating the questions into the normal questions.json.

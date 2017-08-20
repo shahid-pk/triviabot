@@ -1,7 +1,7 @@
 import asyncio
 import os
 from discord.ext import commands
-from cogs.utils.HelperFunctions import getserver, Server, qmsg, getuser
+from cogs.utils.TriviaBackend import getserver, Server, qmsg, getuser
 from cogs.utils.Permissions import permissionChecker
 
 
@@ -92,21 +92,6 @@ class StaffCommands:
         server = getserver(self.serverdict, ctx)
         server.do_trivia = False
         await self.bot.say("Trivia stopped.")
-
-    @commands.command(pass_context = True, aliases = ['question'])
-    @permissionChecker(check = perm)
-    async def trivia(self, ctx):
-        """
-        Get a single trivia question.
-        """
-        server = getserver(self.serverdict, ctx)
-
-        # set the server.q property to the question at the top of the question list, and send it.
-        server.dispense(ctx)
-        await self.bot.say(
-            server.q['question'] + "\n" + qmsg.format(server.q['options'][0], server.q['options'][1],
-                                                      server.q['options'][2], server.q['options'][3]))
-        print('"{}" dispensed.'.format(server.q['question']))
 
     @commands.command(pass_context = True)
     @permissionChecker(check = perm)
@@ -205,6 +190,44 @@ class StaffCommands:
         else:
             print("which hasn't been asked! {0} pls".format(ctx.message.author))
             await self.bot.say("There is no question to bypass.")
+
+    @commands.command(pass_context = True)
+    @permissionChecker(check = perm)
+    async def tn(self, ctx, mode: str = None):
+        """
+        Toggle trivia night mode on or off.
+        :param mode: whether to toggle it on or off
+        """
+        server = getserver(self.serverdict, ctx)
+
+        if not mode:
+            await self.bot.say(f'TriviaNight mode is currently {server.trivianightmode}.')
+            return
+
+        elif mode.lower() == 'true':
+            server.settnmode()
+
+        elif mode.lower() == 'false':
+            server.unsettnmode()
+
+        await self.bot.say(f'TriviaNight mode is set to {server.trivianightmode}.')
+
+    @commands.command(pass_context = True)
+    @permissionChecker(check = 'is_owner')
+    async def endtrivianight(self, ctx):
+        """
+        Moves all the trivia night questions into the normal questions file.
+        """
+        server = getserver(self.serverdict, ctx)
+
+        if not server.trivianightmode:
+            await self.bot.say("I can't end TriviaNight when it hasn't started yet!")
+            return
+
+        await self.bot.say('TriviaNight has ended.')
+        embed = server.getscoreboard()
+        await self.bot.say(embed = embed)
+        server.endtrivianight()
 
 
 def setup(bot):

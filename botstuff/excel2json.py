@@ -24,5 +24,5 @@ if __name__ == '__main__':
 
         qls.append(qdict)
 
-    with open('questions.json', 'w', encoding = 'UTF-8') as f:
+    with open('TNquestions.json', 'w', encoding = 'UTF-8') as f:
         f.write(json.dumps(qls, indent = 4))

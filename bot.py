@@ -7,7 +7,7 @@ import discord
 import os
 
 try:
-    __version__ = '1.3.5'
+    __version__ = '1.4'
 
     description = \
         """Hey boys, I'm a bot written by your OG Ala to provide you with useless trivia."""

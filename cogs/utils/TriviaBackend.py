@@ -77,22 +77,86 @@ class Server:
         self.totalquestions = 0
         self.q = None
 
+        # whether or not to restrict trivia commands
+        self.trivianightmode = False
+
         # a boolean to check whether or not to continually ask questions,
         # and another to check if a correct answer is currently being processed.
         self.do_trivia = False
         self.accept = True
 
         # make the server folder if it's not already created.
-        path = os.path.join('./botstuff/servers/', servid)
-        os.makedirs(path, exist_ok = True)
+        self.path = os.path.join('./botstuff/servers/', servid)
+        os.makedirs(self.path, exist_ok = True)
 
         # define the users.json and the questions.json files, which hold a dictionary of user ids and points,
         # and a list of questions, respectively.
-        self.usersfile = os.path.join(path, 'Users.json')
-        self.questions = os.path.join(path, 'questions.json')
+        self.usersfile = os.path.join(self.path, 'users.json')
+        self.questions = os.path.join(self.path, 'questions.json')
 
-        # fix up Users.json.
-        # ----------------
+        # config file for keeping current question, and trivianightmode.
+        self.config = os.path.join(self.path, 'sessiondata.json')
+
+        # the original questions json file.
+        self.sourceque = './botstuff/questions.json'
+
+        # fix up the json files
+        self.loadusrjson()
+        self.loadquejson()
+        if os.path.isfile(self.config):
+            self.loadconfig()
+        else:
+            with open(self.config, 'w', encoding = 'UTF-8') as f:
+                f.write('{\n}')
+
+    def loadconfig(self):
+        """
+        load sessiondata.json
+        """
+        with open(self.config, 'r', encoding = 'UTF-8') as f:
+            cdict = json.loads(f.read())
+
+        self.q = cdict['q']
+        if cdict['tn']:
+            self.settnmode()
+        else:
+            self.unsettnmode()
+
+    def writeconfig(self):
+        """
+        write sessiondata.json
+        """
+        cdict = {
+            'q': self.q,
+            'tn': self.trivianightmode
+        }
+        with open(self.config, 'w', encoding = 'UTF-8') as f:
+            f.write(json.dumps(cdict, indent = 4))
+
+    def loadquejson(self):
+        """
+        fix up questions.json
+        """
+        # if it's not created, copy the questions from botstuff.
+        if not os.path.isfile(self.questions):
+            shutil.copy2(self.sourceque, self.questions)
+
+        # open the file, decode it, and keep it around as `self.questionlist`
+        with open(self.questions, 'r', encoding = 'UTF-8') as file:
+            self.questionlist = json.loads(file.read())
+
+        # open the original questions.json, and count the total number of questions in there.
+        # this is to ensure the `,count` command is accurate in the event where a question is answered,
+        # and therefore is removed from the server's questions.json.
+        # which necessitates getting the correct total number of questions from the original questions.json file.
+        with open(self.sourceque, 'r', encoding = 'UTF-8') as f:
+            totalls = json.loads(f.read())
+        self.totalquestions = len(totalls)
+
+    def loadusrjson(self):
+        """
+        fix up users.json.
+        """
         # if it's not created yet, create it.
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
@@ -112,24 +176,6 @@ class Server:
                     user.read()
                     self.userdict[usrid] = user
 
-        # fix up questions.json
-        # ----------------
-        # if it's not created, copy the questions from botstuff.
-        if not os.path.isfile(self.questions):
-            shutil.copy2('./botstuff/questions.json', self.questions)
-
-        # open the file, decode it, and keep it around as `self.questionlist`
-        with open(self.questions, 'r', encoding = 'UTF-8') as file:
-            self.questionlist = json.loads(file.read())
-
-        # open the original questions.json, and count the total number of questions in there.
-        # this is to ensure the `,count` command is accurate in the event where a question is answered,
-        # and therefore is removed from the server's questions.json. 
-        # which necessitates getting the correct total number of questions from the original questions.json file.
-        with open('./botstuff/questions.json', 'r', encoding = 'UTF-8') as f:
-            totalls = json.loads(f.read())
-        self.totalquestions = len(totalls)
-
     def resetquestions(self):
         """
         resets the question stack for the server, and resets all the scores.
@@ -139,7 +185,7 @@ class Server:
 
         # remove the questions.json file and copy a fresh set of questions from the original questions.json file
         os.remove(self.questions)
-        shutil.copy2('./botstuff/questions.json', self.questions)
+        shutil.copy2(self.sourceque, self.questions)
 
         # load the questions.json file and keep it as `self.questionlist`
         with open(self.questions, 'r', encoding = 'UTF-8') as file:
@@ -150,6 +196,7 @@ class Server:
 
         # reset the current asked question
         self.q = None
+        self.writeconfig()
 
         # resets the list of users who already answered
         self.already_answered = []
@@ -184,6 +231,7 @@ class Server:
 
         # reset the current question to None.
         self.q = None
+        self.writeconfig()
 
         # update the server's `questions.json` with the new `self.questionlist` after removing a question.
         with open(self.questions, 'w', encoding = 'UTF-8') as file:
@@ -214,6 +262,7 @@ class Server:
         # set the current question to a random item in questionlist
         if not self.q:
             self.q = random.choice(self.questionlist)
+            self.writeconfig()
 
     def getscoreboard(self) -> discord.Embed:
         """
@@ -257,6 +306,65 @@ class Server:
         embed.add_field(name = 'Scores', value = numls)
 
         return embed
+
+    def settnmode(self):
+        """
+        Turn on TriviaNight mode
+        """
+        self.trivianightmode = True
+        self.writeconfig()
+
+        # set the json files into the trivia night versions
+        self.usersfile = os.path.join(self.path, 'TNusers.json')
+        self.questions = os.path.join(self.path, 'TNquestions.json')
+
+        # the original trivia night questions json file.
+        self.sourceque = './botstuff/TNquestions.json'
+
+        # fix up the json files
+        self.loadusrjson()
+        self.loadquejson()
+
+    def unsettnmode(self):
+        """
+        Turn off TriviaNight mode
+        """
+        self.trivianightmode = False
+        self.writeconfig()
+
+        # set the json files into the normal versions
+        self.usersfile = os.path.join(self.path, 'users.json')
+        self.questions = os.path.join(self.path, 'questions.json')
+
+        # the normal original questions json file.
+        self.sourceque = './botstuff/questions.json'
+
+        # fix up the json files
+        self.loadusrjson()
+        self.loadquejson()
+
+    def endtrivianight(self):
+        """
+        Moves all the trivia night questions into the normal questions file, and end trivia night
+        """
+        # get all the questions from trivianight source json
+        with open(self.sourceque, 'r', encoding = 'UTF-8') as f:
+            tnls = json.loads(f.read())
+
+        # reset trivianight questions.json and users.json
+        self.resetquestions()
+
+        # set trivia night to off
+        self.unsettnmode()
+
+        # get the original question json, extend it with the trivia night questions
+        with open(self.sourceque, 'w+', encoding = 'UTF-8') as f:
+            orls = json.loads(f.read())
+            orls.extend(tnls)
+            f.write(json.dumps(orls, indent = 4))
+
+        # reset questions.json and users.json
+        self.resetquestions()
 
 
 def getserver(serverdict, ctx) -> Server:
