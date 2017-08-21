@@ -134,3 +134,6 @@ Contact me on discord: `ala#2941`
   - Fixed some bugs that surfaced in version 1.4
   - Added configurable fuzzy matching.
   - The bot now keeps a json file for configuration. May be manually edited, or edited using commands.
+  
+#### Version 1.5.1
+  - Added some logging, changed default fuzzy threshold.

@@ -97,7 +97,7 @@ class Server:
         self.tn = False
 
         # fuzzy matching threshold
-        self.fuzzythreshold = 92
+        self.fuzzythreshold = 85
 
         # minimum number of characters to use fuzzy matching
         self.fuzzymin = 10
