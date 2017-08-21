@@ -125,6 +125,7 @@ class ManageCommands:
         else:
             os.execl(executable, *([executable] + [argv[0], argv[1]] + [msg.id, msg.channel.id]))
 
+
 def setup(bot):
     x = ManageCommands(bot)
     bot.add_cog(x)

@@ -1,46 +1,42 @@
 [
   {
   "question": "What is the answer to life, the universe, and everything?",
-  "options": {
-    "op1": "Watermelon",
-    "op2": "Coding",
-    "op3": "The number 42",
-    "op4": "Shitposting on Discord"
-  },
-  "answer": "The number 42",
-  "answerno": "3"
+  "options": [
+    "Watermelon",
+    "Coding",
+    "The number 42",
+    "Shitposting on Discord"
+  ],
+  "answer": "The number 42"
 },
   {
   "question": "Who is the leader of the Stormcloak Rebellion",
-  "options": {
-    "op1": "Stormcloaky McStormcloak",
-    "op2": "The Cloaked Storm",
-    "op3": "Jimmy Jimbo",
-    "op4": "Ulfric Stormcloak"
-  },
-  "answer": "Ulfric Stormcloak",
-  "answerno": "4"
+  "options": [
+    "Stormcloaky McStormcloak",
+    "The Cloaked Storm",
+    "Jimmy Jimbo",
+    "Ulfric Stormcloak"
+  ],
+  "answer": "Ulfric Stormcloak"
 },
   {
   "question": "Which country did pakistan split from?",
-  "options": {
-    "op1": "Afghanistan",
-    "op2": "China",
-    "op3": "India",
-    "op4": "Saudi Arabia"
-  },
-  "answer": "India",
-  "answerno": "3"
+  "options": [
+    "Afghanistan",
+    "China",
+    "India",
+    "Saudi Arabia"
+  ],
+  "answer": "India"
 },
   {
   "question": "Which is the answer to this test question?",
-  "options": {
-    "op1": "First",
-    "op2": "Second",
-    "op3": "Third",
-    "op4": "Fourth"
-  },
-  "answer": "Fourth",
-  "answerno": "4"
+  "options": [
+    "First",
+    "Second",
+    "Third",
+    "Fourth"
+  ],
+  "answer": "Fourth"
 }
 ]

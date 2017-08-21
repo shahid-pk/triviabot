@@ -129,3 +129,8 @@ Contact me on discord: `ala#2941`
   - Added TriviaNight mode. Basically, now everyone can get questions from the normal questions.json file, by default. You enable TriviaNight, and the questions file gets switched out for another one, and all commands get locked down, like on previous versions.
   - Refactored `Helperfunctions.py` into `TriviaBackend.py`
   - Added `,tn` and `,endtrivianight` commands, for toggling TriviaNight mode and "officially" ending it and migrating the questions into the normal questions.json.
+  
+### Version 1.5
+  - Fixed some bugs that surfaced in version 1.4
+  - Added configurable fuzzy matching.
+  - The bot now keeps a json file for configuration. May be manually edited, or edited using commands.

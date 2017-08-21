@@ -1,6 +1,5 @@
 import json
 import random
-
 import discord
 import os
 import shutil
@@ -17,12 +16,12 @@ class User:
     """
     represents a User
     """
-    def __init__(self, member, serverid, mention, name):
+    def __init__(self, member, usrfile, mention, name):
         self.points = 0
         self.id = member
         self.mention = mention
         self.name = name
-        self.usersfile = os.path.join('./botstuff/servers/', serverid, 'Users.json')
+        self.usersfile = usrfile
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
                 f.write("{\n}")
@@ -77,9 +76,6 @@ class Server:
         self.totalquestions = 0
         self.q = None
 
-        # whether or not to restrict trivia commands
-        self.trivianightmode = False
-
         # a boolean to check whether or not to continually ask questions,
         # and another to check if a correct answer is currently being processed.
         self.do_trivia = False
@@ -94,20 +90,29 @@ class Server:
         self.usersfile = os.path.join(self.path, 'users.json')
         self.questions = os.path.join(self.path, 'questions.json')
 
-        # config file for keeping current question, and trivianightmode.
-        self.config = os.path.join(self.path, 'sessiondata.json')
-
         # the original questions json file.
         self.sourceque = './botstuff/questions.json'
 
+        # whether or not to restrict trivia commands
+        self.tn = False
+
+        # fuzzy matching threshold
+        self.fuzzythreshold = 92
+
+        # minimum number of characters to use fuzzy matching
+        self.fuzzymin = 10
+
+        # config file for keeping current question, and trivianightmode.
+        self.config = os.path.join(self.path, 'server-conf.json')
+
         # fix up the json files
-        self.loadusrjson()
-        self.loadquejson()
         if os.path.isfile(self.config):
             self.loadconfig()
         else:
             with open(self.config, 'w', encoding = 'UTF-8') as f:
                 f.write('{\n}')
+        self.loadusrjson()
+        self.loadquejson()
 
     def loadconfig(self):
         """
@@ -117,6 +122,8 @@ class Server:
             cdict = json.loads(f.read())
 
         self.q = cdict['q']
+        self.fuzzythreshold = cdict['fuzz']
+        self.fuzzymin = cdict['fuzmin']
         if cdict['tn']:
             self.settnmode()
         else:
@@ -128,7 +135,9 @@ class Server:
         """
         cdict = {
             'q': self.q,
-            'tn': self.trivianightmode
+            'tn': self.tn,
+            'fuzz': self.fuzzythreshold,
+            'fuzmin': self.fuzzymin
         }
         with open(self.config, 'w', encoding = 'UTF-8') as f:
             f.write(json.dumps(cdict, indent = 4))
@@ -137,6 +146,7 @@ class Server:
         """
         fix up questions.json
         """
+        self.questionlist = []
         # if it's not created, copy the questions from botstuff.
         if not os.path.isfile(self.questions):
             shutil.copy2(self.sourceque, self.questions)
@@ -157,6 +167,7 @@ class Server:
         """
         fix up users.json.
         """
+        self.userdict = {}
         # if it's not created yet, create it.
         if not os.path.isfile(self.usersfile):
             with open(self.usersfile, 'w', encoding = "UTF-8") as f:
@@ -172,7 +183,7 @@ class Server:
             # if decoding the dictionary works, convert into `User` objects and load them into `self.userdict`
             if di:
                 for usrid, vls in di.items():
-                    user = User(usrid, self.id, vls[1], vls[2])
+                    user = User(usrid, self.usersfile, vls[1], vls[2])
                     user.read()
                     self.userdict[usrid] = user
 
@@ -311,7 +322,7 @@ class Server:
         """
         Turn on TriviaNight mode
         """
-        self.trivianightmode = True
+        self.tn = True
         self.writeconfig()
 
         # set the json files into the trivia night versions
@@ -329,7 +340,7 @@ class Server:
         """
         Turn off TriviaNight mode
         """
-        self.trivianightmode = False
+        self.tn = False
         self.writeconfig()
 
         # set the json files into the normal versions
@@ -406,7 +417,7 @@ def getuser(serverdict, ctx, mentions = False) -> User:
     try:
         user = serverdict[ctx.message.server.id].userdict[member.id]
     except KeyError:
-        user = User(member.id, ctx.message.server.id, member.mention, member.name)
+        user = User(member.id, serverdict[ctx.message.server.id].usersfile, member.mention, member.name)
         serverdict[ctx.message.server.id].userdict[member.id] = user
 
     return user

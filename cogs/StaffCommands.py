@@ -12,7 +12,7 @@ perm = 'ban_members'
 class StaffCommands:
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.serverdict = {}
 
         os.makedirs("./botstuff/servers", exist_ok = True)
@@ -201,16 +201,16 @@ class StaffCommands:
         server = getserver(self.serverdict, ctx)
 
         if not mode:
-            await self.bot.say(f'TriviaNight mode is currently {server.trivianightmode}.')
+            await self.bot.say(f'TriviaNight mode is currently {server.tn}.')
             return
 
-        elif mode.lower() == 'true':
+        elif mode.lower() in ['true', 'on']:
             server.settnmode()
 
-        elif mode.lower() == 'false':
+        elif mode.lower() in ['false', 'off']:
             server.unsettnmode()
 
-        await self.bot.say(f'TriviaNight mode is set to {server.trivianightmode}.')
+        await self.bot.say(f'TriviaNight mode is set to {server.tn}.')
 
     @commands.command(pass_context = True)
     @permissionChecker(check = 'is_owner')
@@ -220,7 +220,7 @@ class StaffCommands:
         """
         server = getserver(self.serverdict, ctx)
 
-        if not server.trivianightmode:
+        if not server.tn:
             await self.bot.say("I can't end TriviaNight when it hasn't started yet!")
             return
 
@@ -228,6 +228,53 @@ class StaffCommands:
         embed = server.getscoreboard()
         await self.bot.say(embed = embed)
         server.endtrivianight()
+
+    @commands.command(pass_context = True)
+    @permissionChecker(check = perm)
+    async def conf(self, ctx, key: str = None, value: str = None):
+        """
+        Configure server-specific variables.
+        Configurable variables are fuzzymin, which is the minimum number of characters to use fuzzy matching,
+        and fuzzythreshold, which is the match percentage to accept a match as legit
+        :param ctx:
+        :param key: The thing you want to configure
+        :param value: The thing you want the key to be set to.
+        :return:
+        """
+        server = getserver(self.serverdict, ctx)
+
+        # if no key is given, ignore
+        if not key:
+            print('conf is called with no variables. ignored.')
+            return
+
+        # if key isn't one of the configurables, say so and ignore
+        if key not in ['fuzzymin', 'fuzzythreshold']:
+            await self.bot.say('Only `fuzzymin`(minimum number of characters to use fuzzy matching) and '
+                               '`fuzzythreshold`(match percentage for fuzzy matching) are accepted as keys.')
+            return
+
+        # if a value is not given, display the current value
+        if not value:
+            print(f'conf is called with no value. displaying value of {key}...')
+            k = getattr(server, key)
+            await self.bot.say(f'The value of {key} is {k}')
+            return
+
+        # turn value into an integer and make sure it's between 1 and 100
+        try:
+            v = int(value)
+        except ValueError:
+            await self.bot.say('Only numerical values between `1` and `100` are allowed.')
+            return
+
+        if not 1 <= v <= 100:
+            await self.bot.say('Only numerical values between `1` and `100` are allowed.')
+            return
+
+        # set the attribute
+        setattr(server, key, v)
+        await self.bot.say(f'{key} set to {v}.')
 
 
 def setup(bot):
