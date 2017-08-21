@@ -275,6 +275,7 @@ class StaffCommands:
         # set the attribute
         setattr(server, key, v)
         await self.bot.say(f'{key} set to {v}.')
+        server.writeconfig()
 
 
 def setup(bot):

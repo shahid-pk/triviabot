@@ -137,3 +137,4 @@ Contact me on discord: `ala#2941`
   
 #### Version 1.5.1
   - Added some logging, changed default fuzzy threshold.
+  - Hotfixed some bugs.

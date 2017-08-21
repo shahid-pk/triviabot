@@ -121,9 +121,9 @@ class Server:
         with open(self.config, 'r', encoding = 'UTF-8') as f:
             cdict = json.loads(f.read())
 
-        self.q = cdict['q']
         self.fuzzythreshold = cdict['fuzz']
         self.fuzzymin = cdict['fuzmin']
+
         if cdict['tn']:
             self.settnmode()
         else:
@@ -134,7 +134,6 @@ class Server:
         write sessiondata.json
         """
         cdict = {
-            'q': self.q,
             'tn': self.tn,
             'fuzz': self.fuzzythreshold,
             'fuzmin': self.fuzzymin
@@ -207,7 +206,6 @@ class Server:
 
         # reset the current asked question
         self.q = None
-        self.writeconfig()
 
         # resets the list of users who already answered
         self.already_answered = []
@@ -231,7 +229,10 @@ class Server:
         moves into the next question
         """
         # remove the current question from the question list
-        self.questionlist.pop(self.questionlist.index(self.q))
+        try:
+            self.questionlist.pop(self.questionlist.index(self.q))
+        except (ValueError, IndexError):
+            pass
 
         # reset the list of users who already answered
         self.already_answered = []
@@ -242,7 +243,6 @@ class Server:
 
         # reset the current question to None.
         self.q = None
-        self.writeconfig()
 
         # update the server's `questions.json` with the new `self.questionlist` after removing a question.
         with open(self.questions, 'w', encoding = 'UTF-8') as file:
@@ -273,7 +273,6 @@ class Server:
         # set the current question to a random item in questionlist
         if not self.q:
             self.q = random.choice(self.questionlist)
-            self.writeconfig()
 
     def getscoreboard(self) -> discord.Embed:
         """
@@ -335,6 +334,7 @@ class Server:
         # fix up the json files
         self.loadusrjson()
         self.loadquejson()
+        self.nextquestion()
 
     def unsettnmode(self):
         """
@@ -353,6 +353,7 @@ class Server:
         # fix up the json files
         self.loadusrjson()
         self.loadquejson()
+        self.nextquestion()
 
     def endtrivianight(self):
         """
