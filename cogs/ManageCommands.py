@@ -125,6 +125,35 @@ class ManageCommands:
         else:
             os.execl(executable, *([executable] + [argv[0], argv[1]] + [msg.id, msg.channel.id]))
 
+    @commands.command(pass_context = True)
+    @permissionChecker(check = perm)
+    async def unpin(self, ctx, number: int = 1, maxcharlen: int = 250):
+        """
+        Unpins messages from the current channel.
+        :param number: the number of messages to unpin
+        :param maxcharlen: the maximum length of messages to consider
+        """
+        # keep the number of messages unpinned
+        unp = 0
+        print(f'unpinning {number} messages from {ctx.message.channel}')
+
+        # get pins from current channel
+        for msg in await self.bot.pins_from(ctx.message.channel):
+            # if the message is short enough, unpin it
+            if len(msg.content) <= maxcharlen:
+                print(f'{msg.id} unpinned')
+                await self.bot.unpin_message(msg)
+                unp += 1
+
+            # if number of unpinned messages == the number of messages to be unpinned, stop unpinning messages.
+            if unp == number:
+                break
+        else:
+            await self.bot.say(f'There are no pinned messages')
+
+        if unp > 0:
+            await self.bot.say(f'Unpinned {unp} messages from {ctx.message.channel}.')
+
 
 def setup(bot):
     x = ManageCommands(bot)

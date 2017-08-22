@@ -62,51 +62,7 @@ def permissionChecker(**kwargs):
             Lets the bot add additional owners to just a command
     """
 
-    def predicate(ctx):
-        check = kwargs.get('check', 'send_messages')
-        compare = kwargs.get('compare', False)
-        owners = kwargs.get('owners', [])
-        channel = ctx.message.channel
-        server = ctx.message.server
-        author = ctx.message.author
-        settings = getFileJson('Config.json')
-
-        # Checks if it's an owner
-        if author.id in settings['Owner IDs'] + owners:
-            return True
-        # Sees if the author is the server owner
-        elif server.owner.id == author.id:
-            return True
-        elif check == 'is_owner':
-            return False
-
-        # Checks if it's a PM
-        if server is None:
-            return False
-
-        # Looks at the person to compare against
-        if compare:
-
-            # Get the member mentions in the message (excluding the bot)
-            mentions = [i for i in ctx.message.mentions if i.id != ctx.bot.user.id]
-
-            # Check that it's not empty
-            if not mentions:
-                return False
-
-            # Pretty much just return false if they have a higher top role, otherwise continue
-            if author.top_role.position <= mentions[-1].top_role.position:
-                return False
-
-        # Check that the user has permission to actually do what they want to
-        permissionsInChannel = channel.permissions_for(author)
-        if getattr(permissionsInChannel, 'administrator'):
-            return True
-        z = getattr(permissionsInChannel, check)
-        if z:
-            return z
-        else:
-            return False
+    predicate = permcheck
 
     return commands.check(predicate)
 

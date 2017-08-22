@@ -138,3 +138,7 @@ Contact me on discord: `ala#2941`
 #### Version 1.5.1
   - Added some logging, changed default fuzzy threshold.
   - Hotfixed some bugs.
+  
+#### Version 1.5.2
+  - Made most commands available to everyone when TriviaNight mode is off.
+  - Added the `,unpin` command. Does what you expect.

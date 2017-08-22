@@ -1,13 +1,12 @@
 #! python3.6
 from sys import argv, exc_info
 from traceback import format_exception
-
 from discord.ext import commands
 import discord
 import os
 
 try:
-    __version__ = '1.5.1'
+    __version__ = '1.5.2'
 
     description = \
         """Hey boys, I'm a bot written by your OG Ala to provide you with useless trivia."""
